@@ -3,6 +3,23 @@
  * Matches the Python Pydantic models in app/config.py
  */
 
+/** Reasoning configuration for extended thinking models */
+export interface ReasoningConfig {
+  effort?: "low" | "medium" | "high"
+  summary?: "auto" | "concise" | "detailed"
+}
+
+/** Text generation parameters */
+export interface TextConfig {
+  verbosity?: "low" | "medium" | "high"
+}
+
+/** Image handling mode */
+export type ImageMode = "input_image" | "save_and_ref" | "strip"
+
+/** Truncation strategy */
+export type TruncationMode = "auto" | "disabled"
+
 export interface ModelConfig {
   name: string
   upstream_model_id?: string
@@ -12,12 +29,12 @@ export interface ModelConfig {
   force_stream?: boolean
   upstream_system?: boolean
   tool_mapping?: Record<string, string>
-  reasoning?: Record<string, any>
-  truncation?: string
-  text?: Record<string, string>
+  reasoning?: ReasoningConfig
+  truncation?: TruncationMode
+  text?: TextConfig
   max_output_tokens?: number
   parallel_tool_calls?: boolean
-  image_mode?: "input_image" | "save_and_ref" | "strip"
+  image_mode?: ImageMode
   image_dir?: string
   system_replacements?: Record<string, string>
 }
