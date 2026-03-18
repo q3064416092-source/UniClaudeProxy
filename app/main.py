@@ -3,14 +3,17 @@ import logging
 import traceback
 import uuid
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.config import config_path, load_config, reload_config, resolve_route
 from app.watcher import ConfigWatcher
+from app.api.config_routes import router as config_router
 from app.converters.gemini_to_anthropic import (
     build_tool_param_index,
     from_gemini_response,
@@ -112,6 +115,15 @@ class LocalOnlyMiddleware(BaseHTTPMiddleware):
 
 
 app.add_middleware(LocalOnlyMiddleware)
+
+# Register configuration API routes
+app.include_router(config_router)
+
+# Mount frontend static files for /config route
+frontend_dist = Path(__file__).parent.parent / "frontend" / "dist"
+if frontend_dist.exists():
+    app.mount("/config", StaticFiles(directory=str(frontend_dist), html=True), name="config-ui")
+    logger.info("Frontend config UI mounted at /config")
 
 
 @app.post("/v1/messages")

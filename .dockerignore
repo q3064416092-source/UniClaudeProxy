@@ -1,15 +1,33 @@
-﻿__pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.log
-.git/
-.gitignore
-.vscode/
-.idea/
-.venv/
+﻿# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
 venv/
 env/
-Python/
-data/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Frontend
+frontend/node_modules/
+frontend/.vite/
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
 config.json
+data/
+.codebuddy/
+*.log
