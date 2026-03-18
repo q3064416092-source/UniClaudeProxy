@@ -84,12 +84,18 @@ app = FastAPI(
 
 LOCALHOST_ADDRESSES = {"127.0.0.1", "::1", "localhost"}
 
+# Routes that can be accessed from external IPs even when local_only is enabled
+PUBLIC_ROUTES = {"/health", "/api/status"}
+
 
 class LocalOnlyMiddleware(BaseHTTPMiddleware):
     """Middleware that restricts access to localhost connections only.
 
     Rejects any request originating from a non-local IP address
     when local_only is enabled in the server configuration.
+    
+    Exceptions: /health, /api/*, and /config/* routes are always accessible
+    for health checks and configuration management.
     """
 
     async def dispatch(self, request: Request, call_next):
@@ -104,9 +110,14 @@ class LocalOnlyMiddleware(BaseHTTPMiddleware):
         """
         cfg = load_config()
         if cfg.server.local_only:
+            # Allow public routes (health check, config UI, config API)
+            path = request.url.path
+            if path in PUBLIC_ROUTES or path.startswith("/api/") or path.startswith("/config"):
+                return await call_next(request)
+            
             client_host = request.client.host if request.client else None
             if client_host not in LOCALHOST_ADDRESSES:
-                logger.warning("Blocked non-local request from %s", client_host)
+                logger.warning("Blocked non-local request from %s to %s", client_host, path)
                 return PlainTextResponse(
                     status_code=403,
                     content="Forbidden: local_only mode is enabled. Only localhost connections are allowed.",
